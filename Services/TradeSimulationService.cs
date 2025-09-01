@@ -39,6 +39,13 @@ namespace _3rdEyeGitDemo.Services
                 PreviousPrice = 175.80m,
                 Volume = 15000000 
             };
+            _currentPrices["META"] = new TradeData
+            {
+                Symbol = "META",
+                Price = 300.80m,
+                PreviousPrice = 175.80m,
+                Volume = 5000000
+            };
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
