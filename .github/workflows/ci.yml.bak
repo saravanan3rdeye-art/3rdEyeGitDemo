@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  check-formatting:
+    name: check-formatting
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install XamlStyler
+        run: dotnet tool install --global XamlStyler.Console
+      - name: Check XAML formatting
+        run: xstyler -r ./src
+
+  build-debug-x64:
+    name: build (Debug, x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Debug x64
+        run: dotnet build ./src --configuration Debug --runtime win-x64
+
+  build-debug-arm64:
+    name: build (Debug, arm64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Debug arm64
+        run: dotnet build ./src --configuration Debug --runtime win-arm64
+
+  build-release-x64:
+    name: build (Release, x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Release x64
+        run: dotnet build ./src --configuration Release --runtime win-x64
+
+  build-release-arm64:
+    name: build (Release, arm64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - name: Build Release arm64
+        run: dotnet build ./src --configuration Release --runtime win-arm64
+
+  test-release-x64:
+    name: test (Release, x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+      - name: Run tests (Release x64)
+        run: dotnet test ./tests --configuration Release --runtime win-x64
