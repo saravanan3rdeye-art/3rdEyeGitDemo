@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build-debug-x64:
-    name: build (Debug, x64)
+  build-debug:
+    name: build (Debug)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,11 +17,11 @@ jobs:
           dotnet-version: '9.0.x'
       - name: Restore dependencies
         run: dotnet restore ./3rdEyeGitDemo.csproj
-      - name: Build Debug x64
-        run: dotnet build ./3rdEyeGitDemo.csproj --configuration Debug --runtime win-x64 --no-restore
+      - name: Build Debug
+        run: dotnet build ./3rdEyeGitDemo.csproj --configuration Debug --no-restore -warnaserror
 
-  build-debug-x86:
-    name: build (Debug, x86)
+  build-release:
+    name: build (Release)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -30,31 +30,5 @@ jobs:
           dotnet-version: '9.0.x'
       - name: Restore dependencies
         run: dotnet restore ./3rdEyeGitDemo.csproj
-      - name: Build Debug x86
-        run: dotnet build ./3rdEyeGitDemo.csproj --configuration Debug --runtime win-x86 --no-restore
-
-  build-release-x64:
-    name: build (Release, x64)
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '9.0.x'
-      - name: Restore dependencies
-        run: dotnet restore ./3rdEyeGitDemo.csproj
-      - name: Build Release x64
-        run: dotnet build ./3rdEyeGitDemo.csproj --configuration Release --runtime win-x64 --no-restore
-
-  build-release-x86:
-    name: build (Release, x86)
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '9.0.x'
-      - name: Restore dependencies
-        run: dotnet restore ./3rdEyeGitDemo.csproj
-      - name: Build Release x86
-        run: dotnet build ./3rdEyeGitDemo.csproj --configuration Release --runtime win-x86 --no-restore
+      - name: Build Release
+        run: dotnet build ./3rdEyeGitDemo.csproj --configuration Release --no-restore -warnaserror
