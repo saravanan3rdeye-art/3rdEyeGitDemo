@@ -7,9 +7,9 @@
     <RootNamespace>3rdEyeGitDemo</RootNamespace>
     <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
   </PropertyGroup>
-
+<<<<<<<<<<<<
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.8" />
   </ItemGroup>
-
+>>>>>>>>>>>>>
 </Project>
