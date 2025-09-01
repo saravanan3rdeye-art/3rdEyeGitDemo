@@ -1,0 +1,164 @@
+@page "/trading"
+@using Microsoft.AspNetCore.SignalR.Client
+@using _3rdEyeGitDemo.Models
+@implements IAsyncDisposable
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<PageTitle>Real-Time Trading Grid</PageTitle>
+
+<h3>Real-Time Trading Dashboard</h3>
+
+<div id="tradeGrid" style="height: 400px; width: 100%;" class="ag-theme-alpine-dark"></div>
+
+@code {
+    private HubConnection? hubConnection;
+    private List<TradeData> trades = new();
+    private bool isGridInitialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Initialize trades with default data
+            trades = new List<TradeData>
+            {
+                new TradeData { Symbol = "AAPL", Price = 178.50m, PreviousPrice = 178.50m, Volume = 50000000 },
+                new TradeData { Symbol = "MSFT", Price = 415.25m, PreviousPrice = 415.25m, Volume = 25000000 },
+                new TradeData { Symbol = "GOOGL", Price = 175.80m, PreviousPrice = 175.80m, Volume = 15000000 }
+            };
+
+            await InitializeGrid();
+            await StartHubConnection();
+        }
+    }
+
+    private async Task InitializeGrid()
+    {
+        var gridOptions = new
+        {
+            columnDefs = new object[]
+            {
+                new { field = "symbol", headerName = "Symbol", width = 100 },
+                new { 
+                    field = "price", 
+                    headerName = "Price", 
+                    width = 120,
+                    cellClass = "price-cell",
+                    cellClassRules = new {
+                        priceUp = "x => x.data.priceDirection === 'up'",
+                        priceDown = "x => x.data.priceDirection === 'down'"
+                    },
+                    valueFormatter = "x => '$' + x.value.toFixed(2)"
+                },
+                new { 
+                    field = "change", 
+                    headerName = "Change", 
+                    width = 100,
+                    cellClass = "change-cell",
+                    cellClassRules = new {
+                        changePositive = "x => x.value > 0",
+                        changeNegative = "x => x.value < 0"
+                    },
+                    valueFormatter = "x => (x.value > 0 ? '+' : '') + x.value.toFixed(2)"
+                },
+                new { 
+                    field = "changePercent", 
+                    headerName = "Change %", 
+                    width = 120,
+                    cellClass = "change-percent-cell",
+                    cellClassRules = new {
+                        changePositive = "x => x.value > 0",
+                        changeNegative = "x => x.value < 0"
+                    },
+                    valueFormatter = "x => (x.value > 0 ? '+' : '') + x.value.toFixed(2) + '%'"
+                },
+                new { 
+                    field = "volume", 
+                    headerName = "Volume", 
+                    width = 150,
+                    valueFormatter = "x => x.value.toLocaleString()"
+                },
+                new { 
+                    field = "timestamp", 
+                    headerName = "Last Update", 
+                    width = 200,
+                    valueFormatter = "x => new Date(x.value).toLocaleTimeString()"
+                }
+            },
+            rowData = trades.Select(t => new
+            {
+                symbol = t.Symbol,
+                price = t.Price,
+                change = t.Change,
+                changePercent = t.ChangePercent,
+                volume = t.Volume,
+                timestamp = t.Timestamp,
+                priceDirection = t.PriceDirection
+            }).ToArray(),
+            defaultColDef = new
+            {
+                sortable = true,
+                resizable = true
+            },
+            animateRows = true,
+            getRowId = "params => params.data.symbol"
+        };
+
+        await JS.InvokeVoidAsync("initializeAgGrid", "tradeGrid", gridOptions);
+        isGridInitialized = true;
+    }
+
+    private async Task StartHubConnection()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(Navigation.ToAbsoluteUri("/tradehub"))
+            .Build();
+
+        hubConnection.On<TradeData>("ReceiveTradeUpdate", async (tradeData) =>
+        {
+            var existingTrade = trades.FirstOrDefault(t => t.Symbol == tradeData.Symbol);
+            if (existingTrade != null)
+            {
+                var index = trades.IndexOf(existingTrade);
+                trades[index] = tradeData;
+            }
+            else
+            {
+                trades.Add(tradeData);
+            }
+
+            if (isGridInitialized)
+            {
+                await UpdateGridRow(tradeData);
+            }
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    private async Task UpdateGridRow(TradeData trade)
+    {
+        var rowData = new
+        {
+            symbol = trade.Symbol,
+            price = trade.Price,
+            change = trade.Change,
+            changePercent = trade.ChangePercent,
+            volume = trade.Volume,
+            timestamp = trade.Timestamp,
+            priceDirection = trade.PriceDirection
+        };
+
+        await JS.InvokeVoidAsync("updateAgGridRow", rowData);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}

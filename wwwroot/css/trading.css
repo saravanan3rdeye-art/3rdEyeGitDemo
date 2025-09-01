@@ -1,0 +1,72 @@
+.ag-theme-alpine-dark {
+    --ag-background-color: #1e1e1e;
+    --ag-header-background-color: #2d2d2d;
+    --ag-odd-row-background-color: #262626;
+    --ag-row-hover-color: #333333;
+}
+
+.price-cell {
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.priceUp {
+    animation: flashGreen 1s ease;
+    color: #4caf50 !important;
+}
+
+.priceDown {
+    animation: flashRed 1s ease;
+    color: #f44336 !important;
+}
+
+.change-cell,
+.change-percent-cell {
+    font-weight: 600;
+}
+
+.changePositive {
+    color: #4caf50 !important;
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.changeNegative {
+    color: #f44336 !important;
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+@keyframes flashGreen {
+    0% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(76, 175, 80, 0.3);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+@keyframes flashRed {
+    0% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(244, 67, 54, 0.3);
+    }
+    100% {
+        background-color: transparent;
+    }
+}
+
+.ag-cell-value {
+    transition: color 0.3s ease;
+}
+
+h3 {
+    color: #333;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: linear-gradient(90deg, #f0f0f0 0%, #ffffff 100%);
+    border-radius: 5px;
+}
